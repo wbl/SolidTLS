@@ -8,9 +8,10 @@ In addition:
    * all memory access must be checked
    * we target POSIX, and I develop on Mac OS X
    * we never expose structures: use accessor functions instead
-   * Standard C99 only
+   * C means C99
    * No #ifdef: instead provide two implementations of the same function
      and have the build scripts pick one.
    * All secrets must never be exposed to program counters or load addresses
    * (Exception: non AEAD cipher modes)
    * All cryptography must be strong
+   * Assembler only permitted for crypto
