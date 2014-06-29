@@ -36,11 +36,29 @@ typedef void* tls_config; /* Opaque handle */
 
 tls_config tls_config_new(); /* Returns NULL or a tls_config */
 void tls_config_free(tls_config t); /* Cleanup */
+void tls_config_setciphersuites(tls_config t, int *suites);
+/*Sets ciphersuites*/
+
+typedef void* tls_X509;
+tls_X509 tls_X509_new(); /* Allocate a new X509 list */
+void tls_X509_free(tls_X509); /* And destroy it */
+int tls_X509_addcerts(tls_X509 set, char *path);
+/*
+ * Add certs in path. Return -1 if error, 0 otherwise.
+ */
+int tls_X509_keypair(tls_X509 set, char *keypath, char *certpath);
+/*
+ * Load a cert with a private key we can use to authenticate
+ */
+
+void tls_config_set_roots(tls_config t, tls_X509 roots); /* Set the roots */
+void tls_config_set_certchain(tls_config t, tls_X509 key); /* What we send */
+
+/* TODO: consider multiple client certificate issue */
 
 /*
- * TODO: X509 information, resumption information, DANE/OCSP, ciphersuites
+ * TODO: resumption information, DANE/OCSP
  * Resumption is likely to involve talking about threads too much
- *
  */
 
 typedef void* tls_contex; /* Opaque representing connection */

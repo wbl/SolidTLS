@@ -6,7 +6,7 @@ In addition:
    * macros are never allowed
    * no pointer arithmetic
    * all memory access must be checked
-   * we target POSIX, and I develop on Mac OS X
+   * we target POSIX
    * we never expose structures: use accessor functions instead
    * C means C99
    * No #ifdef: instead provide two implementations of the same function
