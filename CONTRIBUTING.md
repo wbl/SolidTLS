@@ -11,7 +11,7 @@ In addition:
    * C means C99
    * No #ifdef: instead provide two implementations of the same function
      and have the build scripts pick one.
-   * All secrets must never be exposed to program counters or load addresses
+   * All secrets must never leak to program counters or load addresses
    * (Exception: non AEAD cipher modes)
    * All cryptography must be strong
    * Assembler only permitted for crypto
