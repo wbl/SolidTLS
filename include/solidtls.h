@@ -43,10 +43,13 @@ typedef tls_X509_struct* tls_X509;
 tls_X509 tls_X509_new(); /* Allocate a new X509 list */
 void tls_X509_free(tls_X509); /* And destroy it */
 int tls_X509_addcerts(tls_X509 set, char *path);
+int tls_X509_addcerts_mem(tls_X509 set, uint8_t* mem, size_t len);
 /*
  * Add certs in path. Return -1 if error, 0 otherwise.
  */
 int tls_X509_keypair(tls_X509 set, char *keypath, char *certpath);
+int tls_X509_keypair_mem(tls_X509 set, uint8_t *kmem, int klen,
+                         uint8_t *certmem, int certlen);
 /*
  * Load a cert with a private key we can use to authenticate
  */
@@ -63,7 +66,7 @@ void tls_config_set_certchain(tls_config t, tls_X509 key); /* What we send */
 
 typedef tls_context_struct * tls_contex; /* Opaque representing connection */
 
-tls_contex tls_contex_new(tls_config cfg); /* Create a new TLS context */
+tls_contex tls_context_new(tls_config cfg); /* Create a new TLS context */
 void tls_context_free(tls_context t);
 
 /* 
@@ -71,9 +74,9 @@ void tls_context_free(tls_context t);
  */
 enum tls_direction {TLS_CLIENT, TLS_SERVER};
 
-void tls_contex_set_write(tls_context ctx, void * dat,
+void tls_context_set_write(tls_context ctx, void * dat,
                            int (* write)(void *, void *, size_t));
-void tls_contex_set_read(tls_context ctx, void * dat,
+void tls_context_set_read(tls_context ctx, void * dat,
                            int (* read)(void *, void *, size_t));
 
 void tls_set_direction(tls_context ctx, enum tls_direction);
