@@ -32,14 +32,14 @@
 /*
  * The basic level: TLS connections
  */
-typedef void* tls_config; /* Opaque handle */
+typedef struct tls_config_struct* tls_config; /* Opaque handle */
 
 tls_config tls_config_new(); /* Returns NULL or a tls_config */
 void tls_config_free(tls_config t); /* Cleanup */
 void tls_config_setciphersuites(tls_config t, int *suites);
 /*Sets ciphersuites*/
 
-typedef void* tls_X509;
+typedef tls_X509_struct* tls_X509;
 tls_X509 tls_X509_new(); /* Allocate a new X509 list */
 void tls_X509_free(tls_X509); /* And destroy it */
 int tls_X509_addcerts(tls_X509 set, char *path);
@@ -61,7 +61,7 @@ void tls_config_set_certchain(tls_config t, tls_X509 key); /* What we send */
  * Resumption is likely to involve talking about threads too much
  */
 
-typedef void* tls_contex; /* Opaque representing connection */
+typedef tls_context_struct * tls_contex; /* Opaque representing connection */
 
 tls_contex tls_contex_new(tls_config cfg); /* Create a new TLS context */
 void tls_context_free(tls_context t);
