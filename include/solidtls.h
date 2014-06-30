@@ -64,7 +64,7 @@ void tls_config_set_certchain(tls_config t, tls_X509 key); /* What we send */
 typedef void* tls_contex; /* Opaque representing connection */
 
 tls_contex tls_contex_new(tls_config cfg); /* Create a new TLS context */
-void tls_config_free(tls_config t);
+void tls_context_free(tls_context t);
 
 /* 
  * Set read and write callbacks.
