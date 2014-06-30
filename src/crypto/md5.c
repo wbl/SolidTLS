@@ -18,6 +18,8 @@
  */
 
 #include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
 #include "md5.h"
 
 static void
@@ -39,7 +41,7 @@ MD5Transform(uint32_t [4], const uint8_t [TLS_MD5_BLOCK_LENGTH]);
 	(cp)[1] = (value) >> 8;						\
 	(cp)[0] = (value); } while (0)
 
-static uint8_t PADDING[MD5_BLOCK_LENGTH] = {
+static uint8_t PADDING[TLS_MD5_BLOCK_LENGTH] = {
 	0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
@@ -69,8 +71,8 @@ tls_MD5_update(TLS_MD5_CTX *ctx, const unsigned char *input, size_t len)
 	size_t have, need;
 
 	/* Check how many bytes we already have and how many more we need. */
-	have = (size_t)((ctx->count >> 3) & (MD5_BLOCK_LENGTH - 1));
-	need = MD5_BLOCK_LENGTH - have;
+	have = (size_t)((ctx->count >> 3) & (TLS_MD5_BLOCK_LENGTH - 1));
+	need = TLS_MD5_BLOCK_LENGTH - have;
 
 	/* Update bitcount */
 	ctx->count += (uint64_t)len << 3;
@@ -85,10 +87,10 @@ tls_MD5_update(TLS_MD5_CTX *ctx, const unsigned char *input, size_t len)
 		}
 
 		/* Process data in MD5_BLOCK_LENGTH-byte chunks. */
-		while (len >= MD5_BLOCK_LENGTH) {
+		while (len >= TLS_MD5_BLOCK_LENGTH) {
 			MD5Transform(ctx->state, input);
-			input += MD5_BLOCK_LENGTH;
-			len -= MD5_BLOCK_LENGTH;
+			input += TLS_MD5_BLOCK_LENGTH;
+			len -= TLS_MD5_BLOCK_LENGTH;
 		}
 	}
 
@@ -102,7 +104,7 @@ tls_MD5_update(TLS_MD5_CTX *ctx, const unsigned char *input, size_t len)
  * 1 0* (64-bit count of bits processed, MSB-first)
  */
 void
-tls_MD5_final(unsigned char digest[MD5_DIGEST_LENGTH], TLS_MD5_CTX *ctx)
+tls_MD5_final(unsigned char digest[TLS_MD5_DIGEST_LENGTH], TLS_MD5_CTX *ctx)
 {
 	uint8_t count[8];
 	size_t padlen;
@@ -112,18 +114,18 @@ tls_MD5_final(unsigned char digest[MD5_DIGEST_LENGTH], TLS_MD5_CTX *ctx)
 	PUT_64BIT_LE(count, ctx->count);
 
 	/* Pad out to 56 mod 64. */
-	padlen = MD5_BLOCK_LENGTH -
-	    ((ctx->count >> 3) & (MD5_BLOCK_LENGTH - 1));
+	padlen = TLS_MD5_BLOCK_LENGTH -
+	    ((ctx->count >> 3) & (TLS_MD5_BLOCK_LENGTH - 1));
 	if (padlen < 1 + 8)
-		padlen += MD5_BLOCK_LENGTH;
-	MD5Update(ctx, PADDING, padlen - 8);		/* padlen - 8 <= 64 */
-	MD5Update(ctx, count, 8);
+		padlen += TLS_MD5_BLOCK_LENGTH;
+	tls_MD5_update(ctx, PADDING, padlen - 8);      /* padlen - 8 <= 64 */
+	tls_MD5_update(ctx, count, 8);
 
 	if (digest != NULL) {
 		for (i = 0; i < 4; i++)
 			PUT_32BIT_LE(digest + i * 4, ctx->state[i]);
 	}
-	explicit_bzero(ctx, sizeof(*ctx));	/* in case it's sensitive */
+	memset_s(ctx, sizeof(*ctx), 0, sizeof(*ctx));	/* in case it's sensitive */
 }
 
 
@@ -147,8 +149,8 @@ tls_MD5_final(unsigned char digest[MD5_DIGEST_LENGTH], TLS_MD5_CTX *ctx)
 static void
 MD5Transform(uint32_t state[4], const uint8_t block[TLS_MD5_BLOCK_LENGTH])
 {
-	uint32_t a, b, c, d, in[MD5_BLOCK_LENGTH / 4];
-	for (a = 0; a < MD5_BLOCK_LENGTH / 4; a++) {
+	uint32_t a, b, c, d, in[TLS_MD5_BLOCK_LENGTH / 4];
+	for (a = 0; a < TLS_MD5_BLOCK_LENGTH / 4; a++) {
 		in[a] = (uint32_t)(
 		    (uint32_t)(block[a * 4 + 0]) |
 		    (uint32_t)(block[a * 4 + 1]) <<  8 |

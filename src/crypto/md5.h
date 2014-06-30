@@ -16,9 +16,9 @@
 #define	TLS_MD5_DIGEST_LENGTH		16
 
 typedef struct TLS_MD5Context {
-	u_int32_t state[4];			/* state */
-	u_int64_t count;			/* number of bits, mod 2^64 */
-	u_int8_t buffer[MD5_BLOCK_LENGTH];	/* input buffer */
+	uint32_t state[4];			/* state */
+	uint64_t count;			/* number of bits, mod 2^64 */
+	uint8_t buffer[TLS_MD5_BLOCK_LENGTH];	/* input buffer */
 } TLS_MD5_CTX;
 
 
