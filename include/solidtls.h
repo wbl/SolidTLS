@@ -71,9 +71,9 @@ void tls_context_free(tls_context t);
  */
 enum tls_direction {TLS_CLIENT, TLS_SERVER};
 
-void tls_contex_set_write(tls_context ctx,
+void tls_contex_set_write(tls_context ctx, void * dat,
                            int (* write)(void *, void *, size_t));
-void tls_contex_set_read(tls_context ctx,
+void tls_contex_set_read(tls_context ctx, void * dat,
                            int (* read)(void *, void *, size_t));
 
 void tls_set_direction(tls_context ctx, enum tls_direction);
