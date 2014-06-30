@@ -36,7 +36,7 @@ typedef struct tls_config_struct* tls_config; /* Opaque handle */
 
 tls_config tls_config_new(); /* Returns NULL or a tls_config */
 void tls_config_free(tls_config t); /* Cleanup */
-void tls_config_setciphersuites(tls_config t, int *suites);
+void tls_config_setciphersuites(tls_config t, enum tls_ciphersuites *suites);
 /*Sets ciphersuites*/
 
 typedef tls_X509_struct* tls_X509;
