@@ -19,11 +19,11 @@ typedef struct {
 	uint32_t state[4];			/* state */
 	uint64_t count;			/* number of bits, mod 2^64 */
 	uint8_t buffer[TLS_MD5_BLOCK_LENGTH];	/* input buffer */
-} TLS_MD5_CTX;
+} tls_MD5_ctx;
 
 
-void	 tls_MD5_init(TLS_MD5_CTX *);
-void	 tls_MD5_update(TLS_MD5_CTX *, const tls_buf *);
-void	 tls_MD5_final(tls_buf*, TLS_MD5_CTX *);
+void	 tls_MD5_init(tls_MD5_ctx *);
+void	 tls_MD5_update(tls_MD5_ctx *, const tls_buf *);
+void	 tls_MD5_final(tls_buf*, tls_MD5_ctx *);
 
 

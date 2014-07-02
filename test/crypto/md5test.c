@@ -11,7 +11,7 @@
 int
 main()
 {
-        TLS_MD5_CTX ctx;
+        tls_MD5_ctx ctx;
         printf("MD5 test suite:\n");
         tls_buf hash;
         tls_buf tests[7];

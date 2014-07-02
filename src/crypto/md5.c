@@ -54,7 +54,7 @@ static uint8_t PADDING[TLS_MD5_BLOCK_LENGTH] = {
  * initialization constants.
  */
 void
-tls_MD5_init(TLS_MD5_CTX *ctx)
+tls_MD5_init(tls_MD5_ctx *ctx)
 {
 	ctx->count = 0;
 	ctx->state[0] = 0x67452301;
@@ -69,7 +69,7 @@ tls_MD5_init(TLS_MD5_CTX *ctx)
  */
 
 static void
-tls_MD5_update_internal(TLS_MD5_CTX *ctx, const unsigned char *input, size_t len)
+tls_MD5_update_internal(tls_MD5_ctx *ctx, const unsigned char *input, size_t len)
 {
 	size_t have, need;
 	/* Check how many bytes we already have and how many more we need. */
@@ -103,7 +103,7 @@ tls_MD5_update_internal(TLS_MD5_CTX *ctx, const unsigned char *input, size_t len
 
 
 void
-tls_MD5_update(TLS_MD5_CTX *ctx, const tls_buf * t)
+tls_MD5_update(tls_MD5_ctx *ctx, const tls_buf * t)
 {
         tls_MD5_update_internal(ctx, t->c, t->len);
 }
@@ -113,7 +113,7 @@ tls_MD5_update(TLS_MD5_CTX *ctx, const tls_buf * t)
  * 1 0* (64-bit count of bits processed, MSB-first)
  */
 void
-tls_MD5_final(tls_buf *out, TLS_MD5_CTX *ctx)
+tls_MD5_final(tls_buf *out, tls_MD5_ctx *ctx)
 {
         assert(out->cap >= 16); /* Ensure enough space */
         out->len = 16;
