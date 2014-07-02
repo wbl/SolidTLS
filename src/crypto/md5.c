@@ -17,9 +17,11 @@
  * will fill a supplied 16-byte array with the digest.
  */
 
+#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include "buf.h"
 #include "md5.h"
 
 static void
@@ -65,11 +67,11 @@ tls_MD5_init(TLS_MD5_CTX *ctx)
  * Update context to reflect the concatenation of another buffer full
  * of bytes.
  */
-void
-tls_MD5_update(TLS_MD5_CTX *ctx, const unsigned char *input, size_t len)
+
+static void
+tls_MD5_update_internal(TLS_MD5_CTX *ctx, const unsigned char *input, size_t len)
 {
 	size_t have, need;
-
 	/* Check how many bytes we already have and how many more we need. */
 	have = (size_t)((ctx->count >> 3) & (TLS_MD5_BLOCK_LENGTH - 1));
 	need = TLS_MD5_BLOCK_LENGTH - have;
@@ -99,17 +101,26 @@ tls_MD5_update(TLS_MD5_CTX *ctx, const unsigned char *input, size_t len)
 		bcopy(input, ctx->buffer + have, len);
 }
 
+
+void
+tls_MD5_update(TLS_MD5_CTX *ctx, const tls_buf * t)
+{
+        tls_MD5_update_internal(ctx, t->c, t->len);
+}
+
 /*
  * Final wrapup - pad to 64-byte boundary with the bit pattern
  * 1 0* (64-bit count of bits processed, MSB-first)
  */
 void
-tls_MD5_final(unsigned char digest[TLS_MD5_DIGEST_LENGTH], TLS_MD5_CTX *ctx)
+tls_MD5_final(tls_buf *out, TLS_MD5_CTX *ctx)
 {
+        assert(out->cap >= 16); /* Ensure enough space */
+        out->len = 16;
 	uint8_t count[8];
 	size_t padlen;
 	int i;
-
+        uint8_t *digest = out->c;
 	/* Convert count to 8 bytes in little endian order. */
 	PUT_64BIT_LE(count, ctx->count);
 
@@ -118,8 +129,8 @@ tls_MD5_final(unsigned char digest[TLS_MD5_DIGEST_LENGTH], TLS_MD5_CTX *ctx)
 	    ((ctx->count >> 3) & (TLS_MD5_BLOCK_LENGTH - 1));
 	if (padlen < 1 + 8)
 		padlen += TLS_MD5_BLOCK_LENGTH;
-	tls_MD5_update(ctx, PADDING, padlen - 8);      /* padlen - 8 <= 64 */
-	tls_MD5_update(ctx, count, 8);
+	tls_MD5_update_internal(ctx, PADDING, padlen - 8);      /* padlen - 8 <= 64 */
+	tls_MD5_update_internal(ctx, count, 8);
 
 	if (digest != NULL) {
 		for (i = 0; i < 4; i++)

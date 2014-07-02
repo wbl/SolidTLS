@@ -1,5 +1,7 @@
 #include<assert.h>
+#include<stdlib.h>
 #include<stdint.h>
+#include<string.h>
 #include "buf.h"
 
 void
@@ -11,27 +13,37 @@ tls_buf_init(tls_buf *t)
 }
 
 uint8_t
-tls_buf_get(tls_buf t, size_t index)
+tls_buf_get(const tls_buf *t, size_t index)
 {
         assert(index < t->len);
         return t->c[index];
 }
 
 int
-tls_buf_set(tls_buf *t, size_t index, uint8_t value)
-{
+tls_buf_ensure_cap(tls_buf *t, size_t cap)
+{                
         uint8_t *space;
         size_t oldcap = t->cap;
-        while (index >= t->cap) {
+        while (cap >= t->cap) {
                 space = realloc(t->c, 2*t->cap+1);
                 if (space == NULL) {
                         free(t->c);
                         return -1;
                 }
+                t->c = space;
                 t->cap = 2*t->cap+1;
         }
         for (size_t i = oldcap; i < t->cap; i++){
                 t->c[i] = 0;
+        }
+        return 0;
+}
+
+int
+tls_buf_set(tls_buf *t, size_t index, uint8_t value)
+{
+        if (tls_buf_ensure_cap(t, index) == -1) {
+                return -1;
         }
         if (t->len <= index) {
                 t->len = index+1;
@@ -41,7 +53,7 @@ tls_buf_set(tls_buf *t, size_t index, uint8_t value)
 }
 
 int
-tls_buf_clone (tls_buf *dst, tls_buf src)
+tls_buf_clone (tls_buf *dst, const tls_buf* src)
 {
         dst->cap = src->len;
         dst->len = src->len;
@@ -76,7 +88,7 @@ tls_buf_len(const tls_buf *t)
 }
 
 int
-tls_buf_append(tls_buf *dst, tls_buf *src)
+tls_buf_append(tls_buf *dst, const tls_buf *src)
 {
         return tls_buf_copy(dst, src, tls_buf_len(dst), 0, tls_buf_len(src));
 }
@@ -91,7 +103,7 @@ tls_buf_clean(tls_buf *t)
 }
 
 int
-tls_buf_copy(tls_buf* dst, tls_buf* src, size_t dst_off, size_t src_off,
+tls_buf_copy(tls_buf* dst, const tls_buf* src, size_t dst_off, size_t src_off,
              size_t len)
 {
         /*
