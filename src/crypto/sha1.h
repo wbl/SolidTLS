@@ -30,7 +30,7 @@
  */
 
 #define TLS_SHA1_DIGEST_LENGTH 20
-#dwfine TLS_SHA1_BLOCK_LENGTH 64
+#define TLS_SHA1_BLOCK_LENGTH 64
 
 typedef struct {
         uint32_t state[5];
