@@ -19,30 +19,25 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
  * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
  * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
  * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
  * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
  * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-typedef struct {
-  uint8_t *c;
-  size_t len;
-  size_t cap;
-}  tls_buf;
+#define TLS_SHA1_DIGEST_LENGTH 20
+#dwfine TLS_SHA1_BLOCK_LENGTH 64
 
-void tls_buf_init(tls_buf* t);
-int tls_buf_copy_string(tls_buf* t, const char * str);
-uint8_t tls_buf_get(const tls_buf* t, size_t index);
-int tls_buf_set(tls_buf* t, size_t index, uint8_t value);
-int tls_buf_clone(tls_buf *dst, const tls_buf* src);
-int tls_buf_append(tls_buf *dst, const tls_buf* src);
-int tls_buf_copy(tls_buf *dst, const tls_buf* src, size_t dst_off,
-                     size_t src_off, size_t len);
-void tls_buf_clean(tls_buf *t);
-size_t tls_buf_len(const tls_buf *t);
-int tls_buf_ensure_cap(tls_buf *t, size_t cap);
+typedef struct {
+        uint32_t state[5];
+        uint64_t count;
+        uint8_t buffer[64];
+} tls_SHA1_ctx;
+
+void    tls_SHA1_init(tls_SHA1_ctx *);
+void    tls_SHA1_update(tls_SHA1_ctx *, const tls_buf *);
+void    tls_SHA1_final(tls_buf *, tls_SHA1_ctx *);
