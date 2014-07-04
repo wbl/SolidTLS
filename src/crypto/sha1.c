@@ -31,14 +31,21 @@
 #include<assert.h>
 #include<stdint.h>
 #include<string.h>
+#include<stdio.h>
+#include "buf.h"
 #include"sha1.h"
 
 #define ROT32(x, m) \
         (((x << (m)) | ((x)>>(32-(m)))))
 
 static void
-SHA1Transform(tls_SHA1_ctx *t, const char m[TLS_SHA1_BLOCK_SIZE])
+SHA1Transform(tls_SHA1_ctx *t, const uint8_t m[TLS_SHA1_BLOCK_LENGTH])
 {
+        printf("Procesing block\n");
+        for(int i=0; i<64; i++){
+                printf("%02x", m[i]);
+        }
+        printf("\n");
         const uint32_t K[] = {
                 0x5A827999,
                 0x6ED9EBA1,
@@ -56,16 +63,16 @@ SHA1Transform(tls_SHA1_ctx *t, const char m[TLS_SHA1_BLOCK_SIZE])
         uint32_t e = t->state[4];
         
         for (int t = 0; t < 16; t++) {
-                W[t] =  m[t*4] << 24;
-                W[t] |= m[t*4+1] << 16;
-                W[t] |= m[t*4+2] << 8;
-                W[t] |= m[t*4+3];
+                W[t] =  (uint32_t)m[t*4] << 24;
+                W[t] |= (uint32_t)m[t*4+1] << 16;
+                W[t] |= (uint32_t)m[t*4+2] << 8;
+                W[t] |= (uint32_t)m[t*4+3];
         }
         for (int t = 16; t < 80; t++) {
                 W[t] = ROT32(W[t-3]^W[t-8]^W[t-14]^W[t-16], 1);
         }
         for (int t = 0; t < 20; t++) {
-                temp = ROT32(a, 5)+((b&c) | (~b & d))+e+W[t]+K[0];
+                temp = ROT32(a, 5)+((b&c)|((~b)&d))+e+W[t]+K[0];
                 e = d;
                 d = c;
                 c = ROT32(b, 30);
@@ -131,7 +138,7 @@ tls_SHA1_update(tls_SHA1_ctx *t, const tls_buf * dat)
                 len -= need;
                 offset += need;
                 SHA1Transform(t, t->buffer);
-                t->count += need *8;
+                t->count += need*8;
         }
         
         while (len > TLS_SHA1_BLOCK_LENGTH) {
@@ -141,7 +148,7 @@ tls_SHA1_update(tls_SHA1_ctx *t, const tls_buf * dat)
                 t->count += TLS_SHA1_BLOCK_LENGTH*8;
         }
         if (len > 0) {
-                memcpy(t->buf, m+offset, len);
+                memcpy(t->buffer, m+offset, len);
                 t->count += len*8;
         }
 }
@@ -149,19 +156,23 @@ tls_SHA1_update(tls_SHA1_ctx *t, const tls_buf * dat)
 void
 tls_SHA1_final(tls_buf *out, tls_SHA1_ctx *t)
 {
-        assert(t->cap >=20);
+        assert(out->cap >=20);
          size_t have = (t->count/8) % TLS_SHA1_BLOCK_LENGTH;
          size_t rem = TLS_SHA1_BLOCK_LENGTH - have;
          t->buffer[have]=0x80;
+         have=have+1;
          if (rem < 9) {
                  /* Need to put length in additional block */
+                 for (size_t h = have+1; h < TLS_SHA1_BLOCK_LENGTH; h++) {
+                         t->buffer[h] = 0;
+                 }
                  SHA1Transform(t, t->buffer);
                  have = 0;
          }
-         for (size_t h = have; h < TLS_SHA1_BLOCK_LENGTH) {
+         for (size_t h = have; h < TLS_SHA1_BLOCK_LENGTH; h++) {
                  t->buffer[h] = 0;
          }
-         char *end = &t->buffer[TLS_SHA1_BLOCK_LENGTH-8];
+         uint8_t *end = &t->buffer[TLS_SHA1_BLOCK_LENGTH-8];
          end[0] = (t->count >> 56) & 0xff;
          end[1] = (t->count >> 48) & 0xff;
          end[2] = (t->count >> 40) & 0xff;
@@ -171,10 +182,14 @@ tls_SHA1_final(tls_buf *out, tls_SHA1_ctx *t)
          end[6] = (t->count >> 8) & 0xff;
          end[7] = (t->count) & 0xff;
          SHA1Transform(t, t->buffer);
-         out->len=16;
+         out->len=20;
+         printf("Result:\n");
+         for(int i=0; i < 5; i++) {
+                 printf("%d is %08x\n", i, t->state[i]);
+         }
          for (int i = 0; i < 5; i++) {
-                 for (int j = 3; j >=0 ; j--) {
-                         out->c[i*4+j] = (t->state[i] >> 8*j) & 0xff;
+                 for (int j = 0; j <4 ; j++) {
+                         out->c[i*4+j] = (t->state[i] >> 8*(3-j)) & 0xff;
                  }
          }
 }
