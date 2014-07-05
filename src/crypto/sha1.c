@@ -31,21 +31,15 @@
 #include<assert.h>
 #include<stdint.h>
 #include<string.h>
-#include<stdio.h>
 #include "buf.h"
 #include"sha1.h"
 
 #define ROT32(x, m) \
-        (((x << (m)) | ((x)>>(32-(m)))))
+        ((((x) << (m)) | ((x)>>(32-(m)))))
 
 static void
 SHA1Transform(tls_SHA1_ctx *t, const uint8_t m[TLS_SHA1_BLOCK_LENGTH])
 {
-        printf("Procesing block\n");
-        for(int i=0; i<64; i++){
-                printf("%02x", m[i]);
-        }
-        printf("\n");
         const uint32_t K[] = {
                 0x5A827999,
                 0x6ED9EBA1,
@@ -88,7 +82,7 @@ SHA1Transform(tls_SHA1_ctx *t, const uint8_t m[TLS_SHA1_BLOCK_LENGTH])
                 a = temp;
         }
         for (int t = 40; t < 60; t++) {
-                temp = ROT32(a, 5) + ((b&c)|(b&d)|(c&d))+e+W[t]+K[2];
+                temp = ROT32(a, 5)+((b&c)|(b&d)|(c&d))+e+W[t]+K[2];
                 e = d;
                 d = c;
                 c = ROT32(b, 30);
@@ -183,10 +177,6 @@ tls_SHA1_final(tls_buf *out, tls_SHA1_ctx *t)
          end[7] = (t->count) & 0xff;
          SHA1Transform(t, t->buffer);
          out->len=20;
-         printf("Result:\n");
-         for(int i=0; i < 5; i++) {
-                 printf("%d is %08x\n", i, t->state[i]);
-         }
          for (int i = 0; i < 5; i++) {
                  for (int j = 0; j <4 ; j++) {
                          out->c[i*4+j] = (t->state[i] >> 8*(3-j)) & 0xff;
