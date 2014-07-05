@@ -157,7 +157,7 @@ tls_SHA1_final(tls_buf *out, tls_SHA1_ctx *t)
          have=have+1;
          if (rem < 9) {
                  /* Need to put length in additional block */
-                 for (size_t h = have+1; h < TLS_SHA1_BLOCK_LENGTH; h++) {
+                 for (size_t h = have; h < TLS_SHA1_BLOCK_LENGTH; h++) {
                          t->buffer[h] = 0;
                  }
                  SHA1Transform(t, t->buffer);
