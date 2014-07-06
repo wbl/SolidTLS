@@ -38,6 +38,6 @@ typedef struct {
         uint8_t buffer[64];
 } tls_SHA256_ctx;
 
-void    tls_SHA256_init(tls_SHA1_ctx *);
-void    tls_SHA256_update(tls_SHA1_ctx *, const tls_buf *);
-void    tls_SHA256_final(tls_buf *, tls_SHA1_ctx *);
+void    tls_SHA256_init(tls_SHA256_ctx *);
+void    tls_SHA256_update(tls_SHA256_ctx *, const tls_buf *);
+void    tls_SHA256_final(tls_buf *, tls_SHA256_ctx *);

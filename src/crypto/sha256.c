@@ -89,7 +89,7 @@ SmallSigmaOne (uint32_t x)
 }
 
 static void
-SHA256Transform(tls_sha256_ctx *t, uint8_t m)
+SHA256Transform(tls_SHA256_ctx *t, uint8_t *m)
 {
         const uint32_t K[] = {
                 0x428a2f98,
@@ -174,11 +174,11 @@ SHA256Transform(tls_sha256_ctx *t, uint8_t m)
                         |(m[4*i+2] << 8)
                         | m[4*i+3];
         }
-        for (int i=16; i< 63; i++) {
-                W[i] = SmallSigmaOne(W[t-2])+W[t-7]+SmallSigmaNull(W[t-15])
-                        + W[t-16];
+        for (int i=16; i< 64; i++) {
+                W[i] = SmallSigmaOne(W[i-2])+W[i-7]+SmallSigmaNull(W[i-15])
+                        + W[i-16];
         }
-        for (int i = 0; i < 63; i++) {
+        for (int i = 0; i < 64; i++) {
                 t1 = h + BigSigmaOne(e)+Ch(e, f, g)+K[i]+W[i];
                 t2 = BigSigmaNull(a)+Maj(a,b,c);
                 h = g;
@@ -205,13 +205,14 @@ tls_SHA256_init(tls_SHA256_ctx *t)
 {
         t->count = 0;
         memset(t->buffer, 0, 64);
-        t->state[0] = 6a09e667;
-        t->state[1] = bb67ae85;
-        t->state[3] = a54ff53a;
-        t->state[4] = 510e527f;
-        t->state[5] = 9b05688c;
-        t->state[6] = 1f83d9ab;
-        t->state[7] = 5be0cd19;
+        t->state[0] = 0x6a09e667;
+        t->state[1] = 0xbb67ae85;
+        t->state[2] = 0x3c6ef372;
+        t->state[3] = 0xa54ff53a;
+        t->state[4] = 0x510e527f;
+        t->state[5] = 0x9b05688c;
+        t->state[6] = 0x1f83d9ab;
+        t->state[7] = 0x5be0cd19;
 }
 
 void
@@ -260,7 +261,7 @@ tls_SHA256_final(tls_buf *out, tls_SHA256_ctx *t)
         for (size_t h = have; h < TLS_SHA256_BLOCK_LENGTH; h++) {
                 t->buffer[h]=0;
         }
-        uint8_t *end = t->buffer[TLS_SHA256_BLOCK_LENGTH - 8];
+        uint8_t *end = &(t->buffer[TLS_SHA256_BLOCK_LENGTH - 8]);
         end[0] = (t->count >> 56) &0xff;
         end[1] = (t->count >> 48) & 0xff;
         end[2] = (t->count >> 40) & 0xff;
