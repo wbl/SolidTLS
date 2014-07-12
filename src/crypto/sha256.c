@@ -33,7 +33,7 @@
 #include<stdint.h>
 #include<string.h>
 #include "buf.h"
-#include"sha256.h"
+#include "sha256.h"
 
 /* In the year 2014 optimizing compilers rule the Earth
  * All the Earth? No, one corner of code still thinks macros

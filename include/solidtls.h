@@ -82,7 +82,6 @@ void tls_context_set_read(tls_context ctx, void * dat,
 void tls_set_direction(tls_context ctx, enum tls_direction);
 int tls_handshake(tls_context ctx); /* Returns 0 on success */
 bool tls_valid_hostname(tls_context ctx, char *host);
-
 /* True if so, false if not*/
 
 /* Read and write data to the other side */
