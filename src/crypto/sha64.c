@@ -228,7 +228,7 @@ tls_SHA512_init(tls_SHA512_ctx *t)
         t->state[4] = 0x510e527fade682d1;
         t->state[5] = 0x9b05688c2b3e6c1f;
         t->state[6] = 0x1f83d9abfb41bd6b;
-        t->state[7] = 0x5be0cd19137e2170;
+        t->state[7] = 0x5be0cd19137e2179;
 }
 
 void
