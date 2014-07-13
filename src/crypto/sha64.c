@@ -50,7 +50,7 @@ ROTR(uint64_t x, int n)
 static uint64_t
 Ch(uint64_t x, uint64_t y, uint64_t z)
 {
-        return (x&y)^((~x)&y);
+        return (x&y)^((~x)&z);
 }
 
 static uint64_t
@@ -60,25 +60,25 @@ Maj(uint64_t x, uint64_t y, uint64_t z)
 }
 
 static uint64_t
-BigSigmaZero(uint64_t x, uint64_t y, uint64_t z)
+BigSigmaZero(uint64_t x)
 {
         return ROTR(x, 28)^ROTR(x, 34)^ROTR(x, 39);
 }
 
 static uint64_t
-BigSigmaOne(uint64_t x, uint64_t y, uint64_t z)
+BigSigmaOne(uint64_t x)
 {
         return ROTR(x, 14)^ROTR(x, 18)^ROTR(x, 41);
 }
 
 static uint64_t
-SmallSigmaZero(uint64_t x, uint64_t y, uint64_t z)
+SmallSigmaZero(uint64_t x)
 {
         return ROTR(x, 1)^ROTR(x, 8)^SHR(x, 7);
 }
 
 static uint64_t
-SmallSigmaOne(uint64_t x, uint64_t y, uint64_t z)
+SmallSigmaOne(uint64_t x)
 {
         return ROTR(x, 19)^ROTR(x, 61)^SHR(x, 6);
 }
@@ -167,20 +167,20 @@ SHA64Transform(tls_SHA512_ctx *t, uint8_t*buf)
                 0x597f299cfc657e2a,
                 0x5fcb6fab3ad6faec,
                 0x6c44198c4a475817,
-        }
+        };
         uint64_t W[80];
         for (int i=0; i<16; i++) {
-                W[i] =  (buf[8*i] << 56)
-                        |(buf[8*i+1] << 48)
-                        |(buf[8*i+2] << 40)
-                        |(buf[8*i+3] << 32)
-                        |(buf[8*i+4] << 24)
-                        |(buf[8*i+5] << 16)
-                        |(buf[8*i+6] << 8)
-                        |(buf[8*i+7]);
-                }
+                W[i] =  ((uint64_t) buf[8*i] << 56)
+                        |((uint64_t)buf[8*i+1] << 48)
+                        |((uint64_t)buf[8*i+2] << 40)
+                        |((uint64_t)buf[8*i+3] << 32)
+                        |((uint64_t)buf[8*i+4] << 24)
+                        |((uint64_t)buf[8*i+5] << 16)
+                        |((uint64_t)buf[8*i+6] << 8)
+                        |((uint64_t)buf[8*i+7]);
+        }
         for (int i=16; i<80; i++) {
-                W[i] = SmallSigmaOne(W[i-2])+W[i-7]+SmallSigmaNull(W[i-15])
+                W[i] = SmallSigmaOne(W[i-2])+W[i-7]+SmallSigmaZero(W[i-15])
                         + W[i-16];
         }
 
@@ -196,7 +196,7 @@ SHA64Transform(tls_SHA512_ctx *t, uint8_t*buf)
         uint64_t t2;
         for (int i=0; i<80; i++) {
                 t1 = h+BigSigmaOne(e)+Ch(e,f,g)+K[i]+W[i];
-                t2 = BigSigmaNull(a)+Maj(a,b,c);
+                t2 = BigSigmaZero(a)+Maj(a,b,c);
                 h = g;
                 g = f;
                 f = e;
@@ -221,29 +221,29 @@ tls_SHA512_init(tls_SHA512_ctx *t)
 {
         t->count = 0;
         memset(t->state, 0, TLS_SHA512_BLOCK_LENGTH);
-        t->state[0] = 6a09e667f3bcc908;
-        t->state[1] = bb67ae8584caa73b;
-        t->state[2] = 3c6ef372fe94f82b;
-        t->state[3] = a54ff53a5f1d36f1;
-        t->state[4] = 510e527fade682d1;
-        t->state[5] = 9b05688c2b3e6c1f;
-        t->state[6] = 1f83d9abfb41bd6b;
-        t->state[7] = 5be0cd19137e2170;
+        t->state[0] = 0x6a09e667f3bcc908;
+        t->state[1] = 0xbb67ae8584caa73b;
+        t->state[2] = 0x3c6ef372fe94f82b;
+        t->state[3] = 0xa54ff53a5f1d36f1;
+        t->state[4] = 0x510e527fade682d1;
+        t->state[5] = 0x9b05688c2b3e6c1f;
+        t->state[6] = 0x1f83d9abfb41bd6b;
+        t->state[7] = 0x5be0cd19137e2170;
 }
 
 void
 tls_SHA384_init(tls_SHA384_ctx *t)
 {
         t->count = 0;
-        memset(t->state, 0, TLS_SHA384_BLOCK_SIZE);
-        t->state[0] = 6a09e667f3bcc908;
-        t->state[1] = bb67ae8584caa73b;
-        t->state[2] = 3c6ef372fe94f82b;
-        t->state[3] = a54ff53a5f1d36f1;
-        t->state[4] = 510e527fade682d1;
-        t->state[5] = 9b05688c2b3e6c1f;
-        t->state[6] = 1f83d9abfb41bd6b;
-        t->state[7] = 5be0cd19137e2179;
+        memset(t->state, 0, TLS_SHA384_BLOCK_LENGTH);
+        t->state[0] = 0xcbbb9d5dc1059ed8;
+        t->state[1] = 0x629a292a367cd507;
+        t->state[2] = 0x9159015a3070dd17;
+        t->state[3] = 0x152fecd8f70e5939;
+        t->state[4] = 0x67332667ffc00b31;
+        t->state[5] = 0x8eb44a8768581511;
+        t->state[6] = 0xdb0c2e0d64f98fa7;
+        t->state[7] = 0x47b5481dbefa4fa4;
 }
 
 void
@@ -257,18 +257,18 @@ tls_SHA512_update(tls_SHA512_ctx *t, const tls_buf *buf)
 {
         size_t have = (t->count/8)%TLS_SHA512_BLOCK_LENGTH;
         size_t need = TLS_SHA512_BLOCK_LENGTH - have;
-        size_t len = b->len;
-        uint8_t *m = b->c;
+        size_t len = buf->len;
+        uint8_t *m = buf->c;
         size_t offset = 0;
         if (len>= need & need !=0) {
                 memcpy(t->buffer+have, m, need);
                 len -= need;
                 offset += need;
-                SHA256Transform(t, t->buffer);
+                SHA64Transform(t, t->buffer);
                 t->count += 8*need;
         }
         while (len > TLS_SHA512_BLOCK_LENGTH) {
-                SHA256Transform(t, m+offset);
+                SHA64Transform(t, m+offset);
                 len -= TLS_SHA512_BLOCK_LENGTH;
                 t->count += 8* TLS_SHA512_BLOCK_LENGTH;
                 offset += TLS_SHA512_BLOCK_LENGTH;
@@ -279,12 +279,57 @@ tls_SHA512_update(tls_SHA512_ctx *t, const tls_buf *buf)
         }
 }
 
+static void
+SHA64final(tls_SHA512_ctx *t)
+{
+        size_t have = (t->count/8)%TLS_SHA512_BLOCK_LENGTH;
+        size_t rem = TLS_SHA512_BLOCK_LENGTH - have;
+        t->buffer[have]=0x80;
+        have=have+1;
+        if (rem < 17) {
+                 /* Need to put length in additional block */
+                 for (size_t h = have; h < TLS_SHA512_BLOCK_LENGTH; h++) {
+                         t->buffer[h] = 0;
+                 }
+                 SHA64Transform(t, t->buffer);
+                 have = 0;
+         }
+        for (size_t h = have; h < TLS_SHA512_BLOCK_LENGTH; h++) {
+                t->buffer[h]=0;
+        }
+        uint8_t *end = &(t->buffer[TLS_SHA512_BLOCK_LENGTH - 8]);
+        end[0] = (t->count >> 56) &0xff;
+        end[1] = (t->count >> 48) & 0xff;
+        end[2] = (t->count >> 40) & 0xff;
+        end[3] = (t->count >> 32) & 0xff;
+        end[4] = (t->count >> 24) & 0xff;
+        end[5] = (t->count >> 16) & 0xff;
+        end[6] = (t->count >> 8) & 0xff;
+        end[7] = (t->count) & 0xff;
+        SHA64Transform(t, t->buffer);
+}
 void
 tls_SHA384_final(tls_buf *out, tls_SHA384_ctx *t)
 {
+        SHA64final(t);
+        assert(out->cap>= TLS_SHA384_DIGEST_LENGTH);
+        out->len=TLS_SHA384_DIGEST_LENGTH;
+        for (int i=0; i<6; i++) {
+                for(int j=0; j<8; j++) {
+                        out->c[8*i+j]=(t->state[i] >> 8*(7-j))&0xff;
+                }
+        }
 }
 
 void
 tls_SHA512_final(tls_buf *out, tls_SHA512_ctx *t)
 {
+        SHA64final(t);
+        assert(out->cap>= TLS_SHA512_DIGEST_LENGTH);
+        out->len=TLS_SHA512_DIGEST_LENGTH;
+        for (int i=0; i<8; i++) {
+                for(int j=0; j<8; j++) {
+                        out->c[8*i+j]=(t->state[i] >> 8*(7-j))&0xff;
+                }
+        }
 }
