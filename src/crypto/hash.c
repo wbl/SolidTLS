@@ -39,8 +39,8 @@
 
 /* Giant boilerplate goes here eventually */
 
-static void
-copy_hash(hash_ctx *a, hash_ctx *b)
+static int
+copy_hash(tls_hash_ctx *a, tls_hash_ctx *b)
 {
         free(a->state);
         a->state = malloc(b->statesize);
@@ -52,4 +52,54 @@ copy_hash(hash_ctx *a, hash_ctx *b)
         a->update = b->update;
         a->final = b->final;
         a->copy = b->copy;
+        return 0;
 }
+
+static int
+final_cleanup (tls_hash_ctx *a)
+{
+        memset_s(a->state, 0, a->statesize);
+        free(a->state);
+        a->state == NULL;
+}
+
+static int
+tls_md5_hash_init_cb (tls_hash_ctx *a)
+{
+        a->state = malloc(sizeof(tls_md5_ctx));
+        if (a->state == NULL) {
+                return -1;
+        }
+        a->statesize = sizeof(tls_md5_ctx);
+        tls_MD5_init((tls_MD5_ctx *)a->state);
+}
+
+static int
+tls_md5_hash_update_cb(tls_hash_ctx *a, const tls_buf *b)
+{
+        tls_MD5_update((tls_MD5_ctx *)a->state, b);
+}
+
+static int
+tls_md5_hash_final_cb(tls_buf *b, tls_hash_ctx *a)
+{
+        tls_MD5_final(b, (tls_MD5_ctx *)a->state);
+        final_cleanup(a);
+}
+
+void *
+tls_hash_md5(void)
+{
+        tls_hash_ctx *ret;
+        ret = malloc(sizeof(tls_hash_ctx));
+        if (ret == NULL) {
+                return ret;
+        }
+        ret->init = &tls_hash_md5_init_cb;
+        ret->update = &tls_hash_md5_update_cb;
+        ret->final = &tls_hash_md5_final_cb;
+        ret->copy = &copy_hash;
+        return ret;
+}
+
+/* Now to do it 4 more times... */

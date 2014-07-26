@@ -36,11 +36,11 @@ typedef struct {
         void (*update)(hash_ctx *, const tls_buf *);
         void (*final)(tls_buf *, hash_ctx *);
         int (*copy)(hash_ctx *, hash_ctx *);
-} hash_ctx;
+} tls_hash_ctx;
 
-hash_ctx *tls_hash_md5(void);
-hash_ctx *tls_hash_sha1(void);
-hash_ctx *tls_hash_sha256(void);
-hash_ctx *tls_sha_sha384(void);
-hash_ctx *tls_sha_sha512(void);
+tls_hash_ctx *tls_hash_md5(void);
+tls_hash_ctx *tls_hash_sha1(void);
+tls_hash_ctx *tls_hash_sha256(void);
+tls_hash_ctx *tls_sha_sha384(void);
+tls_hash_ctx *tls_sha_sha512(void);
 
